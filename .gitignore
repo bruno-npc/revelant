@@ -16,6 +16,9 @@ web-build/
 *.key
 *.mobileprovision
 
+# Ignorar o arquivo firebase-config.js
+firebase-config.js
+
 # Metro
 .metro-health-check*
 
@@ -30,6 +33,7 @@ yarn-error.*
 
 # local env files
 .env*.local
+
 
 # typescript
 *.tsbuildinfo
