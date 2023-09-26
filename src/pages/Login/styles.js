@@ -5,6 +5,11 @@ export const Container = styled.View`
   background-color: #f0f0f0;
 `;
 
+export const ImageContainer = styled.View`
+  width: 100%;
+  height: 40%;
+`;
+
 export const TopBar = styled.View`
   height: 60px;
   width: 100%;
@@ -25,6 +30,16 @@ export const Title = styled.Text`
 export const Subtitle = styled.Text`
   font-size: 18px;
   margin-top: 10px;
+  position: absolute;
+`;
+
+export const TopImage = styled.ImageBackground`
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+  justify-content: center;
+  align-items: center;
 `;
 
 export const Input = styled.TextInput`

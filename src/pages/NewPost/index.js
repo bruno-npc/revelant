@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, TextInput, Button, Alert, Image } from 'react-native';
-import {getDatabase, ref, set } from 'firebase/database';
-import storage from 'firebase/storage';
+
+import { getStorage, ref, uploadBytes } from "firebase/storage";
 import * as ImagePicker from 'expo-image-picker';
 import Constants from 'expo-constants';
 import { AuthContext } from '../../contexts/auth';
+import { doc, setDoc } from "firebase/firestore";
+import { auth, db } from '../../../firebase-config';
 
 export default function NewPost() {
   const [titulo, setTitulo] = useState('');
@@ -25,49 +27,50 @@ export default function NewPost() {
   }, []);
 
   const escolherImagem = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
       aspect: [4, 3],
-      quality: 0.7,
+      quality: 1,
     });
-
-    if (!result.cancelled) {
-      const novaImagem = result.uri;
-      setImagens([...imagens, novaImagem]);
+    console.log(result);
+    if (!result.canceled) {
+      console.log(result.uri)
+      console.log(result.assets[0].uri)
+      setImagens([...imagens, result.assets[0].uri]);
     }
   };
 
   const testarDatabase = async () => {
-    try {
-      const database = getDatabase();
-      const userId = 'KZj0lHdP2mOVmerKzGvYCwcMQzP2';
-      const name = 'BrunoT'
-      const email = 'bruno@gmail.comT';
-      const imageUrl = 'link';
-      // Escrever dados no Firebase Realtime Database
-      set(ref(database, 'users/' + userId), {
-        username: name,
-        email: email,
-        profile_picture : imageUrl
+      await setDoc(doc(db, "user", "user.id"), {
+        name: "Teste",
+        email: "teste"
       });
-      await database.set('Isso é um teste de banco de dados Firebase.');
-      console.log('Dados escritos no Firebase Realtime Database com sucesso.');
-    } catch (error) {
-      console.error('Erro ao escrever dados no Firebase Realtime Database:', error);
-    }
-  };
+    };
+  
 
   const testarStorage = async () => {
-    try {
-      const storageRef = storage().ref('test/imagem.jpg');
-      // Fazer upload de um arquivo para o Firebase Storage
-      await storageRef.putFile('caminho/do/arquivo.jpg');
-      console.log('Arquivo enviado para o Firebase Storage com sucesso.');
-    } catch (error) {
-      console.error('Erro ao enviar arquivo para o Firebase Storage:', error);
-    }
-  };
+ // Função para fazer o upload de imagens
+ console.log(imagens)
+ const storage = getStorage();
+  try {
+      const uploadPromises = imagens.map(async (image, index) => {
+      const imageName = `image_${index + 1}.jpg`; // Nome da imagem no Storage
+      const storageRef = ref(storage, imageName);
+      await uploadBytes(storageRef, image);
+
+      console.log(`Imagem ${index + 1} enviada com sucesso!`);
+    });
+    const uploadResults = await Promise.all(uploadPromises);
+
+    // uploadResults agora contém as URLs de todas as imagens enviadas
+    console.log("URLs das imagens enviadas:", uploadResults);
+    return uploadResults;
+  } catch (error) {
+    console.error("Erro ao enviar imagens:", error);
+    throw error;
+  }
+};
 
   const cadastrarPublicacao = async () => {
     try {

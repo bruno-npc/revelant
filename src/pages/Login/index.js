@@ -1,6 +1,7 @@
-import { View, Text, Image, ActivityIndicator } from 'react-native'
+import { View, Text, StyleSheet,  Image, ActivityIndicator } from 'react-native'
 import React, {useState, useContext} from 'react'
-import { Container, TopBar, BackButton, Title, Subtitle, Input, Button, ButtonText, CheckBoxContainer, CheckBox, CheckBoxText, TextLink, TextLinkText } from './styles'
+import { Container, ImageContainer, TopImage, TopBar, BackButton, Title, Subtitle, Input, Button, ButtonText, CheckBoxContainer, CheckBox, CheckBoxText, TextLink, TextLinkText } from './styles'
+import {LinearGradient} from "expo-linear-gradient"
 
 import { AuthContext } from '../../contexts/auth';
 
@@ -40,9 +41,22 @@ export default function Login() {
 
   if(login){
     return (
+      <>
+      <ImageContainer>
+        <TopImage source={require('../../assets/img/login_background.jpg')}/>
+        <LinearGradient
+        style={styles.gradient}
+        colors={['transparent', 'rgba(0,0,0,0.70)', 'rgba(0,0,0,0.95)']}
+      />
+      <Title style={{position:'absolute', 
+                      color:'#fff',
+                      bottom:14,
+                      left:14,
+                      zIndex:99,
+                      left: '35%',}}>
+      Bem vindo!</Title>
+      </ImageContainer>
       <Container>
-          <Title style={{marginTop: '70%'}}>Bem vindo</Title>
-          <Subtitle>Realizar login:</Subtitle>
           <Input
             placeholder="Email"
             value={email}
@@ -65,23 +79,37 @@ export default function Login() {
             loadingAuth ? (
               <ActivityIndicator size={20} color="#FFF" />
             ) : (
-              <Text>Acessar</Text>
+              <Text style={{color:'#fff'}}>Acessar</Text>
             )
           }
         </Button>
 
         <Button onPress={ () => toggleLogin() }>
-          <Text>Criar uma conta.</Text>
+          <Text style={{color:'#fff'}}>Criar uma conta.</Text>
         </Button>
       </Container>
+      </>
     );
   }
   return (
+
+    <>
+    <ImageContainer>
+      <TopImage source={require('../../assets/img/login_background.jpg')}/>
+      <LinearGradient
+      style={styles.gradient}
+      colors={['transparent', 'rgba(0,0,0,0.70)', 'rgba(0,0,0,0.95)']}
+    />
+    <Title style={{position:'absolute', 
+                    color:'#fff',
+                    bottom:14,
+                    left:14,
+                    zIndex:99,
+                    left: '23%',}}>
+    Página de cadastro</Title>
+    </ImageContainer>
+
     <Container>
-      <Text>Página cadastro</Text>
-
-        <Title style={{marginTop: '70%'}}>Cadastro...</Title>
-
         <Input
           placeholder="Nome"
           value={name}
@@ -103,14 +131,31 @@ export default function Login() {
             loadingAuth ? (
               <ActivityIndicator size={20} color="#FFF" />
             ) : (
-              <Text>Cadastrar</Text>
+              <Text style={{color:'#fff'}}>Cadastrar</Text>
             )
         }
       </Button>
 
       <Button onPress={ () => toggleLogin() }>
-        <Text>Já tenho uma conta.</Text>
+        <Text style={{color:'#fff'}}>Já tenho uma conta.</Text>
       </Button>
     </Container>
+    </>
   )
 }
+
+const styles = StyleSheet.create({
+  gradient:{
+    flex: 1,
+    position:'absolute',
+    left:0,
+    right:0,
+    bottom:0,
+    height:'55%',
+    width:'100%',
+    zIndex:1,
+    backgroundColor:'transparent',
+    justifyContent: 'center',
+    alignItems:'center'
+  }
+});

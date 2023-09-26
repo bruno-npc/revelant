@@ -38,7 +38,7 @@ function StackScreen(){
 function AppRoutes() {
  return (
    <Tab.Navigator
-      tabBarOptions={{
+   screenOptions={{
         keyboardHidesTabBar: true,
         showLabel: false,
         style:{
