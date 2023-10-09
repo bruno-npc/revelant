@@ -1,12 +1,17 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, TextInput, Button, Alert, Image } from 'react-native';
 
-import { getStorage, ref, uploadBytes } from "firebase/storage";
+import {
+  getStorage,
+  ref,
+  uploadBytes,
+  getDownloadURL,
+} from "firebase/storage";
 import * as ImagePicker from 'expo-image-picker';
 import Constants from 'expo-constants';
 import { AuthContext } from '../../contexts/auth';
-import { doc, setDoc } from "firebase/firestore";
 import { auth, db } from '../../../firebase-config';
+import { getDatabase, ref as refDatabase, set as setDatabase } from "firebase/database";
 
 export default function NewPost() {
   const [titulo, setTitulo] = useState('');
@@ -26,6 +31,21 @@ export default function NewPost() {
     })();
   }, []);
 
+  const getBlobFromUri = async (uri) => {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.onload = function () {
+        resolve(xhr.response);
+      };
+      xhr.onerror = function () {
+        reject(new TypeError("Network request failed"));
+      };
+      xhr.responseType = "blob";
+      xhr.open("GET", uri, true);
+      xhr.send(null);
+    });
+  };
+
   const escolherImagem = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
@@ -35,79 +55,34 @@ export default function NewPost() {
     });
     console.log(result);
     if (!result.canceled) {
-      console.log(result.uri)
-      console.log(result.assets[0].uri)
       setImagens([...imagens, result.assets[0].uri]);
     }
   };
 
-  const testarDatabase = async () => {
-      await setDoc(doc(db, "user", "user.id"), {
-        name: "Teste",
-        email: "teste"
-      });
-    };
-  
-
-  const testarStorage = async () => {
- // Função para fazer o upload de imagens
- console.log(imagens)
- const storage = getStorage();
-  try {
-      const uploadPromises = imagens.map(async (image, index) => {
-      const imageName = `image_${index + 1}.jpg`; // Nome da imagem no Storage
-      const storageRef = ref(storage, imageName);
-      await uploadBytes(storageRef, image);
-
-      console.log(`Imagem ${index + 1} enviada com sucesso!`);
-    });
-    const uploadResults = await Promise.all(uploadPromises);
-
-    // uploadResults agora contém as URLs de todas as imagens enviadas
-    console.log("URLs das imagens enviadas:", uploadResults);
-    return uploadResults;
-  } catch (error) {
-    console.error("Erro ao enviar imagens:", error);
-    throw error;
-  }
-};
-
-  const cadastrarPublicacao = async () => {
+  const realizarPostagem = async () => {
+    const storage = getStorage();
     try {
-
-      if (!user) {
-        Alert.alert('Erro', 'Você deve estar autenticado para cadastrar uma publicação.');
-        return;
-      }
-
-      const publicacaoRef = database().ref('publicacoes').push({
-        userId: user.uid, // Associar ID do usuário autenticado
-        titulo,
-        descricao,
+      const uploadPromises = imagens.map(async (image, index) => {
+        const imageName = `image_${index + 1}.jpg`;
+        const storageRef = ref(storage, imageName);
+        const imageBlob = await getBlobFromUri(image);
+        await uploadBytes(storageRef, imageBlob);
+        const imageUrl = await getDownloadURL(storageRef);
+        return imageUrl;
       });
-
-      const publicacaoId = publicacaoRef.key;
-
-      // Enviar imagens para o Firebase Storage e associar à publicação
-      for (let i = 0; i < imagens.length; i++) {
-        const imagem = imagens[i];
-        const imagemRef = storage().ref(`imagens/${publicacaoId}/imagem${i + 1}.jpg`);
-        const response = await fetch(imagem);
-        const blob = await response.blob();
-        await imagemRef.put(blob);
-        const url = await imagemRef.getDownloadURL();
-        setImagemUrls([...imagemUrls, url]);
-      }
-
-      Alert.alert('Sucesso', 'Publicação cadastrada com sucesso.');
-      // Limpar os campos após o cadastro
-      setTitulo('');
-      setDescricao('');
-      setImagens([]);
-      setImagemUrls([]);
+      const uploadResults = await Promise.all(uploadPromises);
+      setImagemUrls([...imagemUrls, ...uploadResults]);
+      console.log('upload realizado com sucesso: ', uploadResults)
+      const db = getDatabase();
+      setDatabase(refDatabase(db, 'missao/' + user.uid), {
+        titulo: titulo,
+        descricao: descricao,
+        picture_ref: uploadResults
+      });
+      console.log('Postagem realizada com sucesso');
     } catch (error) {
-      Alert.alert('Erro', 'Não foi possível cadastrar a publicação. Verifique os dados e tente novamente.');
-      console.error(error);
+      console.error('Erro ao realizar a postagem:', error);
+      throw error;
     }
   };
 
@@ -132,10 +107,7 @@ export default function NewPost() {
           style={{ width: 100, height: 100 }}
         />
       ))}
-      <Button title="Cadastrar Publicação" onPress={cadastrarPublicacao} />
-
-      <Button title="Testar Database" onPress={testarDatabase} />
-      <Button title="Testar Storage" onPress={testarStorage} />
+      <Button title="Cadastrar Publicação" onPress={realizarPostagem} />
     </View>
   );
 }
