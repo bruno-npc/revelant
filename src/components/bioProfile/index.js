@@ -19,7 +19,7 @@ export function Biografia(){
 
 
   return (
-    <ScrollView>
+    <View>
       <Carousel
         data={images}
         renderItem={renderImageItem}
@@ -61,7 +61,7 @@ export function Biografia(){
         </View>
 
       </View>
-    </ScrollView>
+    </View>
   );
 };
 
@@ -84,6 +84,7 @@ const styles = StyleSheet.create({
   donationText: {
     fontSize: 16,
     fontWeight: 'bold',
+    paddingBottom:50
   },
   userStory: {
     marginTop: 16,

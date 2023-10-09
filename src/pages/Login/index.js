@@ -98,7 +98,7 @@ export default function Login() {
       <TopImage source={require('../../assets/img/login_background.jpg')}/>
       <LinearGradient
       style={styles.gradient}
-      colors={['transparent', 'rgba(0,0,0,0.70)', 'rgba(0,0,0,0.95)']}
+      colors={['transparent', 'rgba(255,255,255,0.70)', 'rgba(255,255,255,0.95)']}
     />
     <Title style={{position:'absolute', 
                     color:'#fff',
