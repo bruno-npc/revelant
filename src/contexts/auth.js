@@ -78,6 +78,8 @@ function AuthProvider({ children }) {
             historia: '',
             biodescricao: '',
             imgbioprofile:[''],
+            imgprofile: '',
+            backgroundprofile: ''
           });
           setUser(user);
         })

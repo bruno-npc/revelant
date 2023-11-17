@@ -81,10 +81,11 @@ export default function NewPost() {
         passosMissao: passos,
         likes: 0,
         created: new Date(),
+        andamento: true,
         autor: user.nome,
-        userId: user.uid
+        userId: user.uid,
+        userImg: ''
       });
-      console.log("********************************User: ", user.nome)
 
       clearAll();
     } catch (error) {

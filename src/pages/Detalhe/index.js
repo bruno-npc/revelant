@@ -27,7 +27,12 @@ export default function Detalhe({ route }) {
         <TouchableOpacity
           style={styles.authorContainer}
           onPress={() => console.log('Author clicked')}>
-          <Image source={{ uri: post.authorImage }} style={styles.authorImage} />
+          <View style={styles.profileImageContainer}>
+            <Image
+              source={require('../../assets/img/pastor.jpg')}
+              style={styles.profileImage}
+            />
+          </View>
           <Text style={styles.authorName}>{post.autor}</Text>
         </TouchableOpacity>
         <Text style={styles.postTitle}>{post.title}</Text>
@@ -84,6 +89,18 @@ const styles = StyleSheet.create({
   slideImage: {
     width: '100%',
     height: 220,
+  },
+  profileImageContainer: {
+    width: 35,
+    height: 35,
+    borderRadius: 40,
+    overflow: 'hidden',
+    padding: 5
+  },
+  profileImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
   },
   authorContainer: {
     flexDirection: 'row',

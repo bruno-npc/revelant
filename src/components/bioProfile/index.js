@@ -13,28 +13,34 @@ export function Biografia({ historia, imagens }) {
 
   return (
     <View style={styles.container}>
-      <Carousel
-        data={imagens}
-        renderItem={renderImageItem}
-        sliderWidth={Dimensions.get('window').width}
-        itemWidth={Dimensions.get('window').width}
-        onSnapToItem={(index) => setActiveSlide(index)}
-        lockScrollWhileSnapping={true}
-        snapToInterval={Dimensions.get('window').width}
-        snapToAlignment={'start'}
-      />
-      <Pagination
-        dotsLength={imagens.length}
-        activeDotIndex={activeSlide}
-        containerStyle={styles.paginationContainer}
-        dotStyle={styles.paginationDot}
-        inactiveDotOpacity={0.4}
-        inactiveDotScale={0.6}
-      />
+      {imagens && imagens.length > 0 ? (
+        <>
+          <Carousel
+            data={imagens}
+            renderItem={renderImageItem}
+            sliderWidth={Dimensions.get('window').width}
+            itemWidth={Dimensions.get('window').width}
+            onSnapToItem={(index) => setActiveSlide(index)}
+            lockScrollWhileSnapping={true}
+            snapToInterval={Dimensions.get('window').width}
+            snapToAlignment={'start'}
+          />
+          <Pagination
+            dotsLength={imagens.length}
+            activeDotIndex={activeSlide}
+            containerStyle={styles.paginationContainer}
+            dotStyle={styles.paginationDot}
+            inactiveDotOpacity={0.4}
+            inactiveDotScale={0.6}
+          />
+        </>
+      ) : null}
 
       <View style={styles.userStory}>
         <Text style={styles.storyTitle}>Minha História</Text>
-        <Text style={styles.storyText}>{historia}</Text>
+        {historia ? (
+          <Text style={styles.storyText}>{historia}</Text>
+        ) : null}
       </View>
 
       <View style={styles.userDonation}>
