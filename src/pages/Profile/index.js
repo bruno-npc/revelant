@@ -142,7 +142,9 @@ export default function Profile() {
       igreja: editedIgreja,
       religiao: editedReligiao,
       estado: editedEstado,
+      biodescricao: editedDescricao
     });
+    fetchUser();
     setEditMode(false);
   };
 

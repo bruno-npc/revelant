@@ -77,7 +77,7 @@ function AuthProvider({ children }) {
             recomendacaopastoral: documentoRecomendacaoPastoral,
             historia: '',
             biodescricao: '',
-            imgbioprofile:[''],
+            imgbioprofile:['https://static.vecteezy.com/ti/fotos-gratis/t2/22906122-ai-gerado-cristao-igreja-com-uma-religioso-cruz-e-aura-luz-dentro-a-todo-sala-foto.jpg'],
             imgprofile: '',
             backgroundprofile: ''
           });
