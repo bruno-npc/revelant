@@ -1,13 +1,19 @@
 import { Text, View } from 'react-native';
-import {Container} from './styles'
 
 export default function PostsUser() {
   return (
-    <Container>
+    <View style={styles.container}>
       <View>
         <Text>PostsUser</Text>
       </View>
-    </Container>
+    </View>
 
   );
 }
+const styles = StyleSheet.create({
+  container:{
+    flex: 1,
+    padding: '20px',
+    backgroundColor: '#f0f0f0'
+  }
+});

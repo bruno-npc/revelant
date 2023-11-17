@@ -1,9 +1,12 @@
 import React from "react";
 import { View, Text, StyleSheet, Image } from "react-native";
 import Feather from 'react-native-vector-icons/Feather'
-import {LinearGradient} from "expo-linear-gradient"
+import { LinearGradient } from "expo-linear-gradient"
 
-export function MeusPosts({ imagemSource, descricao }) {
+export function MeusPosts({ imagemSource, titulo, descricao, andamento }) {
+  const andamentoText = andamento ? "Em andamento" : "Finalizado";
+  const corFundo = andamento ? '#32a852' : 'red';
+
   return (
     <View style={styles.container}>
       <View style={styles.imagemContainer}>
@@ -12,23 +15,26 @@ export function MeusPosts({ imagemSource, descricao }) {
           style={styles.gradient}
           colors={['transparent', 'rgba(0,0,0,0.70)', 'rgba(0,0,0,0.95)']}
         />
-        <Text style={{position:'absolute', 
-                      color:'#fff',
-                      bottom:14,
-                      zIndex:99,
-                      left: '2%'}}>
-                      Titulo da missão
-                      </Text>
-        <Text style={{position:'absolute',
-                      backgroundColor: '#32a852',
-                      padding: 5,
-                      borderRadius: 5,
-                      color:'#fff',
-                      bottom:14,
-                      zIndex:99,
-                      left: '70%'}}>
-                      Em andamento
-                      </Text>
+        <Text style={{ position: 'absolute', color: '#fff', bottom: 14, zIndex: 99, left: '2%' }}>
+          {titulo}
+        </Text>
+        {andamento && (
+          <View style={{
+            position: 'absolute',
+            bottom: 14,
+            zIndex: 99,
+            left: '70%',
+          }}>
+            <Text style={{
+              backgroundColor: '#32a852',
+              padding: 5,
+              borderRadius: 5,
+              color: '#fff',
+            }}>
+              {andamentoText}
+            </Text>
+          </View>
+        )}
       </View>
       <View style={styles.textoContainer}>
         <View style={styles.iconesContainer}>
@@ -48,26 +54,25 @@ export function MeusPosts({ imagemSource, descricao }) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#fff",
     marginBottom: 14,
     flexDirection: "column",
     padding: 12,
     borderRadius: 4,
-    borderWidth: 1, // Largura da borda
-    borderColor: 'grey', // Cor da borda
+    borderWidth: 1,
+    borderColor: 'grey',
   },
-  gradient:{
+  gradient: {
     flex: 1,
-    position:'absolute',
-    left:0,
-    right:0,
-    bottom:0,
-    height:'55%',
-    width:'100%',
-    zIndex:1,
-    backgroundColor:'transparent',
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: '55%',
+    width: '100%',
+    zIndex: 1,
+    backgroundColor: 'transparent',
     justifyContent: 'center',
-    alignItems:'center'
+    alignItems: 'center'
   },
   imagemContainer: {
     width: '100%',
@@ -75,7 +80,7 @@ const styles = StyleSheet.create({
   },
   imagem: {
     width: '100%',
-    height: 200, // Defina a altura desejada para a imagem
+    height: 200,
     borderRadius: 4,
   },
   textoContainer: {
@@ -88,6 +93,6 @@ const styles = StyleSheet.create({
   },
   descricao: {
     fontSize: 16,
-    color: '#000'
+    color: '#000',
   },
 });

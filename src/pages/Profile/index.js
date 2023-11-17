@@ -1,23 +1,81 @@
-import { useContext, useState } from 'react';
-
-import { Biografia } from '../../components/bioProfile';
-import { MeusPosts } from '../../components/myPosts';
-import {View, Button, SafeAreaView, ScrollView, Text, StyleSheet, TouchableOpacity, Image } from 'react-native'
+import { useContext, useState, useEffect } from 'react';
+import {ActivityIndicator, View, ScrollView, Text, StyleSheet, TouchableOpacity, Image } from 'react-native'
 import { AntDesign } from '@expo/vector-icons';
 import { AuthContext } from '../../contexts/auth';
+import { db } from '../../../firebase-config';
 import {LinearGradient} from "expo-linear-gradient"
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import { Biografia } from '../../components/bioProfile';
+import { MeusPosts } from '../../components/myPosts';
 
 export default function Profile() {
   const { signOut } = useContext(AuthContext);
   const [activeTab, setActiveTab] = useState('postagens');
-  const [church, setChurch] = useState('Igreja');
-  const [state, setState] = useState('Estado');
-  const [religion, setReligion] = useState('Religião');
+  const { user } = useContext(AuthContext);
+  const [loading, setLoading] = useState(true);
 
-  const [description, setDescription] = useState('Descrição Lorem ipsum dolor sit amet, consectetur adipiscing elit. ');
+  const [posts, setPosts] = useState([]);
+  const [follow, setFollow] = useState(0);
+
+  const [backgroundProfile, setBackgroundProfile] = useState('');
+  const [imgProfile, setImgProfile] = useState('');
+  const [userName, setUserName] = useState('');
+  const [descricaoBio, setDescricaoBio] = useState('');
+  const [historiaProfile, setHistoriaProfile] = useState('');
+  const [imgBioProfile, setImgBioProfile] = useState([]);
+  const [igreja, setIgreja] = useState('');
+  const [religiao, setReligiao] = useState('');
+  const [estado, setEstado] = useState('');
+
+    const fetchUser = async () => {
+      try {
+        const userProfileCollection = collection(db, 'users');
+        const q = query(userProfileCollection, where('uid', '==', user.uid));
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach(doc => {
+          setUserName(doc.data().nome);
+          setFollow(doc.data().follow);
+          setIgreja(doc.data().igreja);
+          setReligiao(doc.data().religiao);
+          setEstado(doc.data().estado);
+          setDescricaoBio(doc.data().biodescricao);
+          setHistoriaProfile(doc.data().historia);
+          const images = doc.data().imgbioprofile || [];
+          setImgBioProfile(images);
+        });
+      } catch (error) {
+        console.error('Erro ao buscar o nome do usuário:', error);
+      }
+    };
+
   const handleTabChange = (tab) => {
     setActiveTab(tab);
   };
+
+  const fetchDataPosts = async () => {
+    try {
+      const q = query(collection(db, 'missao'), where('userId', '==', user.uid));
+      const querySnapshot = await getDocs(q);
+      const postList = [];
+      querySnapshot.forEach(doc => {
+        postList.push({
+          id: doc.id,
+          images: doc.data().picture_ref,
+          description: doc.data().descricao,
+          title: doc.data().titulo,
+        });
+      });
+      setPosts(postList);
+      setLoading(false);
+    } catch (error) {
+      console.error('Erro ao buscar dados:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchUser();
+    fetchDataPosts();
+  }, []);
 
   return (
     <ScrollView style={styles.container}>
@@ -36,17 +94,17 @@ export default function Profile() {
           />
         </View>
         <View style={styles.profileInfo}>
-          <Text style={styles.profileName}>João</Text>
+          <Text style={styles.profileName}>{userName}</Text>
           <View style={styles.followersInfo}>
-            <Text>100 Acompanham    </Text>
-            <Text>52 Missões</Text>
+            <Text>{follow} Acompanham    </Text>
+            <Text>{posts.length} Missões</Text>
           </View>
           <View style={styles.personalInfo}>
-            <Text>{church}</Text>
-            <Text>{religion}</Text>
-            <Text>{state}</Text>
+            <Text>{igreja}</Text>
+            <Text>{religiao}</Text>
+            <Text>{estado}</Text>
           </View>
-          <Text style={styles.description}>{description}</Text>
+          <Text style={styles.description}>{descricaoBio}</Text>
         </View>
       </View>
       <TouchableOpacity
@@ -80,30 +138,25 @@ export default function Profile() {
       {/* Conteúdo da aba selecionada */}
       {activeTab === 'postagens' ? (
       <View>
-        <MeusPosts
-          imagemSource={require('../../assets/img/login_background.jpg')}
-          descricao="Esta é uma descrição de exemplo para a postagem 1."
-        />
-        <MeusPosts
-          imagemSource={require('../../assets/img/login_background.jpg')}
-          descricao="Esta é uma descrição de exemplo para a postagem 2."
-        />
-        <MeusPosts
-          imagemSource={require('../../assets/img/biblia.jpg')}
-          descricao="Esta é uma descrição de exemplo para a postagem 2."
-        />
-        <MeusPosts
-          imagemSource={require('../../assets/img/login_background.jpg')}
-          descricao="Esta é uma descrição de exemplo para a postagem 2."
-        />
-        <MeusPosts
-          imagemSource={require('../../assets/img/biblia.jpg')}
-          descricao="Esta é uma descrição de exemplo para a postagem 2."
-        />
+        {loading ? (
+          <ActivityIndicator size={50} color="#e52246" />
+        ) : (
+          <View>
+            {posts.map(post => (
+              <MeusPosts
+                key={post.id}
+                imagemSource={{ uri: post.images[0] }}
+                titulo={post.title}
+                descricao={post.description}
+              />
+            ))}
+          </View>
+        )}
       </View>
-      ) : (
-        <Biografia/>
-      )}
+    ) : (
+      <Biografia historia={historiaProfile} imagens={imgBioProfile} />
+    )}
+    <View style={{ marginBottom: 50 }}/>
     </ScrollView>
   );
 }
@@ -117,7 +170,7 @@ const styles = StyleSheet.create({
   },
   profileHeader: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     marginBottom: 20,
   },
   profileImageContainer: {
@@ -146,7 +199,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: 'gray',
     maxWidth: '90%',
-    overflowWrap: 'break-word',
+    overflowWrap: 'break-word'
   },
   followersInfo: {
     flexDirection: 'row',
@@ -164,6 +217,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     marginBottom: 20,
+    marginTop: 10,
+    padding: 10,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#9372F1',
   },
   tab: {
     borderBottomWidth: 2,
@@ -187,12 +245,12 @@ const styles = StyleSheet.create({
     alignItems:'center'
   },
   button: {
-    width: 100, // Largura desejada
-    height: 40,  // Altura desejada
-    backgroundColor: 'red', // Cor de fundo
+    width: 100,
+    height: 40, 
+    backgroundColor: 'red', 
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 5, // Cantos arredondados, se desejar
+    borderRadius: 5, 
   },
   buttonText: {
     color: 'white',

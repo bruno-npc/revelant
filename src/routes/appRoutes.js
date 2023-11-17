@@ -6,6 +6,7 @@ import Home from '../pages/Home';
 import Profile from '../pages/Profile';
 import NewPost from '../pages/NewPost';
 import PostsUser from '../pages/NewPost';
+import Detalhe from '../pages/Detalhe'
 
 import Feather from 'react-native-vector-icons/Feather'
 
@@ -15,20 +16,8 @@ const Stack = createStackNavigator();
 function StackScreen(){
   return(
     <Stack.Navigator>
-      <Stack.Screen 
-              name='Home' 
-              component={Home} 
-              options={{headerShown: false}}/>
-      <Stack.Screen 
-              name='NewPost' 
-              component={NewPost}
-              options={{
-                headerTintColor: '#fff',
-                headerStyle:{
-                  backgroundColor: '#9372F1'
-                }
-                }}
-              />
+      <Stack.Screen name='Home' component={Home} options={{headerShown: false}}/>
+      <Stack.Screen name='Missão' component={Detalhe} options={{headerShown: true}}/>
       <Stack.Screen name='PostsUser' component={PostsUser} options={{headerShown: false}}/>
     </Stack.Navigator>
   )
@@ -56,6 +45,16 @@ function AppRoutes() {
             headerShown: false,
             tabBarIcon: ({color, size}) => {
                 return <Feather name='home' color={color} size={size}/>
+            }
+          }}
+       />
+      <Tab.Screen 
+          name="Criar" 
+          component={NewPost} 
+          options={{
+            headerShown: false,
+            tabBarIcon: ({color, size}) => {
+                return <Feather name='edit-2' color={color} size={size}/>
             }
           }}
        />

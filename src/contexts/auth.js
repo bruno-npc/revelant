@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
 
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, getDocs, collection, query, where, } from "firebase/firestore";
 
 import { auth, db } from '../../firebase-config';
 
@@ -28,42 +28,56 @@ function AuthProvider({ children }) {
     loadStorage();
   }, []);
 
-  async function signIn(email, password){
+  async function signIn(email, password) {
     setLoadingAuth(true);
+  
+    try {
+      const { user } = await signInWithEmailAndPassword(auth, email, password);
+  
+      const userProfileCollection = collection(db, 'users');
+      const q = query(userProfileCollection, where('uid', '==', user.uid));
+      const querySnapshot = await getDocs(q);
+  
+      if (!querySnapshot.empty) {
+       const userData = querySnapshot.docs[0].data();
 
-    await signInWithEmailAndPassword(auth, email, password).then( async (value) => {
-      let uid = value.user.uid;
-      //const userProfile = await firestore().collection('users').doc(uid).get();
-      //console.log(userProfile.data().nome);
-      let data = {
-        uid: uid,
-        //nome: userProfile.data().nome,
-        email: value.user.email
-      };
-
-      setUser(data);
-      storageUser(data);
+        let data = {
+          uid: user.uid,
+          email: user.email,
+          nome: userData.nome,
+        };
+        setUser(data);
+        storageUser(data);
+      } else {
+        console.log('Documento do usuário não encontrado.');
+      }
+  
       setLoadingAuth(false);
-
-    })
-    .catch((error) => {
-      console.log(error);
+    } catch (error) {
+      console.error('Erro ao realizar login:', error);
       setLoadingAuth(false);
-    })
+    }
   }
 
-  async function signUp(email, password, name) {
+  async function signUp(email, password, name, estado, igreja, religiao, documentoRecomendacaoPastoral) {
     setLoadingAuth(true);
     try {
       await createUserWithEmailAndPassword(auth, email.trim(), password)
       .then((userCredential) => {
           const user = userCredential.user;
-          console.log(user.uid)
           setLoading(false);
           setDoc(doc(db, "users", user.uid), {
-            nome: name,
+            uid: user.uid,
             email: email,
-            uid: user.uid
+            nome: name,
+            estado: estado,
+            igreja: igreja,
+            religiao: religiao,
+            follow: 0,
+            recomendacaopastoral: documentoRecomendacaoPastoral,
+            historia: '',
+            biodescricao: '',
+            imgbioprofile:[''],
           });
           setUser(user);
         })
