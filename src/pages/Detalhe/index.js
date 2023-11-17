@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity, TextInput, Dimensions } from 'react-native';
-import Carousel from 'react-native-snap-carousel';
+import Carousel, { Pagination } from 'react-native-snap-carousel';
 
 export default function Detalhe({ route }) {
   const { post } = route.params;
   const [liked, setLiked] = useState(false);
-  
+  const [activeSlide, setActiveSlide] = React.useState(0);
+
   const renderImageItem = ({ item }) => (
     <Image source={{ uri: item }} style={styles.slideImage} />
   );
@@ -22,12 +23,25 @@ export default function Detalhe({ route }) {
         snapToInterval={Dimensions.get('window').width}
         snapToAlignment={'start'}
       />
+      <Pagination
+        dotsLength={post.images.length}
+        activeDotIndex={activeSlide}
+        containerStyle={styles.paginationContainer}
+        dotStyle={styles.paginationDot}
+        inactiveDotOpacity={0.4}
+        inactiveDotScale={0.6}
+      />
 
       <View style={styles.postInfoContainer}>
         <TouchableOpacity
           style={styles.authorContainer}
           onPress={() => console.log('Author clicked')}>
-          <Image source={{ uri: post.authorImage }} style={styles.authorImage} />
+          <View style={styles.profileImageContainer}>
+            <Image
+              source={require('../../assets/img/pastor.jpg')}
+              style={styles.profileImage}
+            />
+          </View>
           <Text style={styles.authorName}>{post.autor}</Text>
         </TouchableOpacity>
         <Text style={styles.postTitle}>{post.title}</Text>
@@ -84,6 +98,18 @@ const styles = StyleSheet.create({
   slideImage: {
     width: '100%',
     height: 220,
+  },
+  profileImageContainer: {
+    width: 35,
+    height: 35,
+    borderRadius: 40,
+    overflow: 'hidden',
+    padding: 5
+  },
+  profileImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
   },
   authorContainer: {
     flexDirection: 'row',
