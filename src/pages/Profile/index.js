@@ -7,9 +7,11 @@ import { collection, query, where, getDocs, doc, updateDoc, getDoc } from 'fireb
 import { Biografia } from '../../components/bioProfile';
 import { MeusPosts } from '../../components/myPosts';
 import * as ImagePicker from 'expo-image-picker';
+import { useNavigation } from '@react-navigation/native';
+import Feather from 'react-native-vector-icons/Feather'
 
 export default function Profile() {
-  const { signOut } = useContext(AuthContext);
+  const { signOut, signed } = useContext(AuthContext);
   const [activeTab, setActiveTab] = useState('postagens');
   const { user } = useContext(AuthContext);
   const [loading, setLoading] = useState(true);
@@ -32,10 +34,27 @@ export default function Profile() {
   const [editedReligiao, setEditedReligiao] = useState(religiao);
   const [editedEstado, setEditedEstado] = useState(estado);
   const [editedDescricao, setEditedDescricao] = useState(descricaoBio);
-
   const [editingHistoria, setEditingHistoria] = useState(false);
   const [editedHistoria, setEditedHistoria] = useState(historiaProfile);
-  
+  const [editing, setEditing] = useState(false);
+  const navigation = useNavigation();
+
+  const handleNavigateToEditProfile = (userID, db) => {
+    navigation.navigate('Editar Perfil', { userID, db });
+  };
+
+  function logoutUser(){
+    signOut();
+    console.log('Valor logout', signed)
+    if(!signed){
+      navigation.navigate('AuthRoutes')
+    }
+  }
+
+  const handleToggleEditing = () => {
+    setEditing(!editing);
+  };
+
   const handleEditHistoria = () => {
     setEditingHistoria(true);
   };
@@ -61,7 +80,7 @@ export default function Profile() {
         setHistoriaProfile(doc.data().historia);
         const images = doc.data().imgbioprofile || [];
         setImgBioProfile(images);
-
+        setImgProfile(doc.data().imgprofile);
         setEditedIgreja(doc.data().igreja);
         setEditedReligiao(doc.data().religiao);
         setEditedEstado(doc.data().estado);
@@ -99,6 +118,14 @@ export default function Profile() {
   useEffect(() => {
     fetchUser();
     fetchDataPosts();
+  }, []);
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      fetchUser();
+      fetchDataPosts();
+    }, 8000);
+    return () => clearInterval(intervalId);
   }, []);
 
   const updateUserProfile = async (userId, newData) => {
@@ -156,172 +183,171 @@ export default function Profile() {
     setEditMode(false);
   };
 
-  return (
-    <ScrollView style={styles.container}>
-      <View style={styles.imagemContainer}>
-        <TouchableOpacity onPress={() => escolherImagem('background')}>
-          <Image
-            source={
-              backgroundProfile
-                ? { uri: backgroundProfile }
-                : require('../../assets/img/background.png')
-            }
-            style={styles.imagem}
-          />
+    return (
+      <ScrollView style={styles.container}>
+        <TouchableOpacity style={styles.configuracoes} onPress={() => handleNavigateToEditProfile(user.uid, db)}>
+          <Feather name='menu' color={'black'} size={20} />
         </TouchableOpacity>
-        <LinearGradient
-          style={styles.gradient}
-          colors={['transparent', 'rgba(255,255,255,0.8)', 'rgba(255,255,255,1)']}
-        />
-      </View>
-      <View style={styles.profileHeader}>
-        <TouchableOpacity onPress={() => escolherImagem('profile')}>
-          <View style={styles.profileImageContainer}>
+        <View style={styles.imagemContainer}>
             <Image
               source={
-                imgProfile
-                  ? { uri: imgProfile }
-                  : require('../../assets/img/pastor.jpg')
+                backgroundProfile
+                  ? { uri: backgroundProfile }
+                  : require('../../assets/img/background.png')
               }
-              style={styles.profileImage}
+              style={styles.imagem}
             />
+          <LinearGradient
+            style={styles.gradient}
+            colors={['transparent', 'rgba(255,255,255,0.8)', 'rgba(255,255,255,1)']}
+          />
+        </View>
+        <View style={styles.profileHeader}>
+          <TouchableOpacity onPress={() => escolherImagem('profile')}>
+            <View style={styles.profileImageContainer}>
+              <Image
+                source={{ uri: imgProfile }}
+                style={styles.profileImage}
+              />
+            </View>
+          </TouchableOpacity>
+          <View style={styles.profileInfo}>
+            <Text style={styles.profileName}>{userName}</Text>
+            <View style={styles.followersInfo}>
+              <Text>{follow} Acompanham </Text>
+              <Text>{posts.length} Missões</Text>
+            </View>
+            {editMode ? (
+              <View style={styles.editScrollView}>
+                <TextInput
+                  style={styles.input}
+                  value={editedIgreja}
+                  onChangeText={setEditedIgreja}
+                  placeholder="Igreja"
+                />
+                <TextInput
+                  style={styles.input}
+                  value={editedReligiao}
+                  onChangeText={setEditedReligiao}
+                  placeholder="Religião"
+                />
+                <TextInput
+                  style={styles.input}
+                  value={editedEstado}
+                  onChangeText={setEditedEstado}
+                  placeholder="Estado"
+                />
+                <TextInput
+                  style={[styles.input, styles.multilineInput]}
+                  value={editedDescricao}
+                  onChangeText={setEditedDescricao}
+                  placeholder="Descrição"
+                  multiline={true}
+                  numberOfLines={4}
+                />
+              </View>
+            ) : (
+              <View style={styles.personalInfo}>
+                <Text>{igreja}</Text>
+                <Text>{religiao}</Text>
+                <Text>{estado}</Text>
+                <Text style={styles.description}>{descricaoBio}</Text>
+              </View>
+            )}
           </View>
-        </TouchableOpacity>
-        <View style={styles.profileInfo}>
-          <Text style={styles.profileName}>{userName}</Text>
-          <View style={styles.followersInfo}>
-            <Text>{follow} Acompanham </Text>
-            <Text>{posts.length} Missões</Text>
-          </View>
+        </View>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.button} onPress={logoutUser}>
+            <Text style={styles.buttonText}>Sair</Text>
+          </TouchableOpacity>
           {editMode ? (
-            <View style={styles.editScrollView}>
-              <TextInput
-                style={styles.input}
-                value={editedIgreja}
-                onChangeText={setEditedIgreja}
-                placeholder="Igreja"
-              />
-              <TextInput
-                style={styles.input}
-                value={editedReligiao}
-                onChangeText={setEditedReligiao}
-                placeholder="Religião"
-              />
-              <TextInput
-                style={styles.input}
-                value={editedEstado}
-                onChangeText={setEditedEstado}
-                placeholder="Estado"
-              />
-              <TextInput
-                style={[styles.input, styles.multilineInput]}
-                value={editedDescricao}
-                onChangeText={setEditedDescricao}
-                placeholder="Descrição"
-                multiline={true}
-                numberOfLines={4}
-              />
-            </View>
+            <TouchableOpacity style={styles.button} onPress={handleUpdateProfile}>
+              <Text style={styles.buttonText}>Salvar</Text>
+            </TouchableOpacity>
           ) : (
-            <View style={styles.personalInfo}>
-              <Text>{igreja}</Text>
-              <Text>{religiao}</Text>
-              <Text>{estado}</Text>
-              <Text style={styles.description}>{descricaoBio}</Text>
-            </View>
+            <TouchableOpacity style={styles.buttonEdit} onPress={() => setEditMode(true)}>
+              <Text style={styles.buttonText}>Editar</Text>
+            </TouchableOpacity>
           )}
         </View>
-      </View>
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button} onPress={() => signOut()}>
-          <Text style={styles.buttonText}>Sair</Text>
-        </TouchableOpacity>
-        {editMode ? (
-          <TouchableOpacity style={styles.button} onPress={handleUpdateProfile}>
-            <Text style={styles.buttonText}>Salvar</Text>
+        <View style={styles.tabsContainer}>
+          {/* Aba de Postagens */}
+          <TouchableOpacity
+            style={[styles.tab, activeTab === 'postagens' && styles.activeTab]}
+            onPress={() => setActiveTab('postagens')}
+          >
+            <Text style={styles.tabText}>Missões</Text>
           </TouchableOpacity>
+          {/* Aba de Biografia */}
+          <TouchableOpacity
+            style={[styles.tab, activeTab === 'biografia' && styles.activeTab]}
+            onPress={() => setActiveTab('biografia')}
+          >
+            <Text style={styles.tabText}>Biografia</Text>
+          </TouchableOpacity>
+        </View>
+        {/* Conteúdo da aba selecionada */}
+        {activeTab === 'postagens' ? (
+          <View>
+            {loading ? (
+              <ActivityIndicator size={50} color="#e52246" />
+            ) : (
+              <View>
+                {posts.length > 0 ? (
+                  posts.map((post) => (
+                    <MeusPosts
+                      key={post.id}
+                      imagemSource={{ uri: post.images[0] }}
+                      titulo={post.title}
+                      descricao={post.description}
+                      andamento={post.andamento}
+                    />
+                  ))
+                ) : (
+                  <View>
+                    <Text>Nenhuma missão encontrada.</Text>
+                    <TouchableOpacity
+                      style={styles.fetchButton}
+                      onPress={fetchDataPosts}
+                    >
+                      <Text style={styles.buttonText}>Buscar Novos Posts</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </View>
+            )}
+          </View>
         ) : (
-          <TouchableOpacity style={styles.button} onPress={() => setEditMode(true)}>
-            <Text style={styles.buttonText}>Editar</Text>
-          </TouchableOpacity>
+          <View>
+            {editingHistoria ? (
+              <>
+                <TextInput
+                  style={styles.input}
+                  value={editedHistoria}
+                  onChangeText={setEditedHistoria}
+                  multiline
+                  placeholder="Digite sua nova história..."
+                />
+                <TouchableOpacity style={styles.button} onPress={handleSaveHistoria}>
+                  <Text style={styles.buttonText}>Salvar</Text>
+                </TouchableOpacity>
+              </>
+            ) : (
+              <>
+              {/* 
+                <TouchableOpacity style={styles.editHistoria} onPress={handleEditHistoria}>
+                  <Text>{editingHistoria ? 'Cancelar' : 'Editar Minha história'}</Text>
+                </TouchableOpacity>
+                */}
+                <Biografia historia={historiaProfile} imagens={imgBioProfile} />
+              </>
+            )}
+          </View>
         )}
-      </View>
-      <View style={styles.tabsContainer}>
-        {/* Aba de Postagens */}
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'postagens' && styles.activeTab]}
-          onPress={() => setActiveTab('postagens')}
-        >
-          <Text style={styles.tabText}>Missões</Text>
-        </TouchableOpacity>
-        {/* Aba de Biografia */}
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'biografia' && styles.activeTab]}
-          onPress={() => setActiveTab('biografia')}
-        >
-          <Text style={styles.tabText}>Biografia</Text>
-        </TouchableOpacity>
-      </View>
-      {/* Conteúdo da aba selecionada */}
-      {activeTab === 'postagens' ? (
-        <View>
-          {loading ? (
-            <ActivityIndicator size={50} color="#e52246" />
-          ) : (
-            <View>
-              {posts.length > 0 ? (
-                posts.map((post) => (
-                  <MeusPosts
-                    key={post.id}
-                    imagemSource={{ uri: post.images[0] }}
-                    titulo={post.title}
-                    descricao={post.description}
-                    andamento={post.andamento}
-                  />
-                ))
-              ) : (
-                <View>
-                  <Text>Nenhuma missão encontrada.</Text>
-                  <TouchableOpacity
-                    style={styles.fetchButton}
-                    onPress={fetchDataPosts}
-                  >
-                    <Text style={styles.buttonText}>Buscar Novos Posts</Text>
-                  </TouchableOpacity>
-                </View>
-              )}
-            </View>
-          )}
-        </View>
-      ) : (
-        <View>
-          {editingHistoria ? (
-            <>
-              <TextInput
-                style={styles.input}
-                value={editedHistoria}
-                onChangeText={setEditedHistoria}
-                multiline
-                placeholder="Digite sua nova história..."
-              />
-              <TouchableOpacity style={styles.button} onPress={handleSaveHistoria}>
-                <Text style={styles.buttonText}>Salvar</Text>
-              </TouchableOpacity>
-            </>
-          ) : (
-            <>
-              <TouchableOpacity style={styles.editHistoria} onPress={handleEditHistoria}>
-                <Text>{editingHistoria ? 'Cancelar' : 'Editar Minha história'}</Text>
-              </TouchableOpacity>
-              <Biografia historia={historiaProfile} imagens={imgBioProfile} />
-            </>
-          )}
-        </View>
-      )}
-      <View style={{ marginBottom: 50 }} />
-    </ScrollView>
-  );
-}
+        <View style={{ marginBottom: 50 }} />
+      </ScrollView>
+    );
+  };
 
 const styles = StyleSheet.create({
   container: {
@@ -329,6 +355,18 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF',
     padding: 14,
     paddingTop: 36,
+  },
+  configuracoes:{
+    position: 'absolute',
+    top: 30,
+    right: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    backgroundColor: 'white',
+    zIndex: 99,
   },
   editHistoria:{
     width: '100%',
@@ -433,6 +471,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 5,
+  },
+  buttonEdit: {
+    width: 100,
+    height: 40,
+    backgroundColor: '#9372F1',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 5,
+    color: '#FFFFFF'
   },
   buttonText: {
     color: 'white',

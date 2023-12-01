@@ -7,6 +7,7 @@ import Profile from '../pages/Profile';
 import NewPost from '../pages/NewPost';
 import PostsUser from '../pages/NewPost';
 import Detalhe from '../pages/Detalhe'
+import ProfileEdit from '../pages/ProfileEdit';
 
 import Feather from 'react-native-vector-icons/Feather'
 
@@ -19,6 +20,7 @@ function StackScreen(){
       <Stack.Screen name='Home' component={Home} options={{headerShown: false}}/>
       <Stack.Screen name='Missão' component={Detalhe} options={{headerShown: true}}/>
       <Stack.Screen name='PostsUser' component={PostsUser} options={{headerShown: false}}/>
+      <Stack.Screen name='Editar Perfil' component={ProfileEdit}/>
     </Stack.Navigator>
   )
 }

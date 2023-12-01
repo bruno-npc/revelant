@@ -82,12 +82,13 @@ export default function NewPost() {
         likes: 0,
         created: new Date(),
         andamento: true,
-        autor: user.nome,
+        autor: user.nome !== null ? user.nome : 'não informado',
         userId: user.uid,
         userImg: ''
       });
 
       clearAll();
+      Alert.alert('Parabéns!', 'Publicação realizada.');
     } catch (error) {
       console.error('Erro ao realizar a postagem:', error);
       throw error;

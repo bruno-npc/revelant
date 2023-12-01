@@ -63,6 +63,7 @@ export default function Detalhe({ route }) {
       </View>
 
       <View style={styles.actionsContainer}>
+        {/* 
         <TouchableOpacity onPress={() => setLiked(!liked)}>
           <Text style={liked ? styles.likedText : styles.actionText}>
             {liked ? 'Curtido' : 'Curtir'}
@@ -74,13 +75,16 @@ export default function Detalhe({ route }) {
         <TouchableOpacity onPress={() => console.log('Share clicked')}>
           <Text style={styles.actionText}>Compartilhar</Text>
         </TouchableOpacity>
+        */}
       </View>
       <View style={styles.commentContainer}>
+        {/* 
         <Image source={{ uri: post.authorImage }} style={styles.commentAuthorImage} />
         <TextInput
           style={styles.commentInput}
           placeholder="Adicione um comentário..."
         />
+        */}
       </View>
     </ScrollView>
   );

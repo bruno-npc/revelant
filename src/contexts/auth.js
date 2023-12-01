@@ -1,13 +1,11 @@
 import React, { useState, createContext, useEffect } from 'react';
-
+import { Alert } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
 
 import { doc, setDoc, getDocs, collection, query, where, } from "firebase/firestore";
-
-import { auth, db } from '../../firebase-config';
-
+import { auth, db } from '../contexts/firebase-config';
 export const AuthContext = createContext({});
 
 function AuthProvider({ children }) {
@@ -83,9 +81,10 @@ function AuthProvider({ children }) {
           });
           setUser(user);
         })
-        .then(() => alert("Conta cadastrada com sucesso!"))
+        .then(() => Alert.alert("Conta cadastrada com sucesso!"))
         .catch((error) => {
           console.log(error);
+          Alert.alert('Aviso', 'Erro ao cadastrar conta!');
         })
       storageUser(user);
       setLoadingAuth(false);

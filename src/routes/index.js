@@ -1,31 +1,20 @@
-import React, { useContext } from 'react';
-import { View, ActivityIndicator } from 'react-native';
+import React from 'react';
+import { createStackNavigator } from '@react-navigation/stack';
 
-import { AuthContext } from '../contexts/auth';
-
-import AuthRoutes from './authRoutes';
+import Dashboard from '../pages/Dashboard';
 import AppRoutes from './appRoutes';
+import AuthRoutes from './authRoutes';
+
+const Stack = createStackNavigator();
 
 function Routes() {
-    const { signed } = useContext(AuthContext);
-    const loading = false;
-
-    if(loading){
-        <View 
-        style={{
-            flex:1,
-            justifyContent: 'center',
-            alignItems: 'center',
-            backgroundColor: '#36393F'
-        }}
-        >
-            <ActivityIndicator size={50} color="#e52246" />
-        </View>
-    }
-
- return (
-   signed ? <AppRoutes/> : <AuthRoutes/>
-  );
+  return(
+    <Stack.Navigator initialRouteName='Dashboard' screenOptions={{ headerShown: false }}>
+      <Stack.Screen name='AppRoutes' component={AppRoutes}/>
+      <Stack.Screen name='AuthRoutes' component={AuthRoutes}/>
+      <Stack.Screen name='Dashboard' component={Dashboard}/>
+    </Stack.Navigator>
+  )
 }
 
 export default Routes;

@@ -1,11 +1,14 @@
-import { Text, TextInput, StyleSheet, ActivityIndicator, View, Image, TouchableOpacity, ScrollView } from 'react-native'
+import { Text, TextInput, StyleSheet, ActivityIndicator, View, Image, Alert, TouchableOpacity, ScrollView } from 'react-native'
 import React, {useState, useContext} from 'react'
 import {LinearGradient} from "expo-linear-gradient"
 import { AuthContext } from '../../contexts/auth';
 import * as DocumentPicker from 'expo-document-picker';
+import Feather from 'react-native-vector-icons/Feather'
+
+import { useNavigation } from '@react-navigation/native';
 
 export default function Login() {  
-  const { signIn, signUp, loadingAuth } = useContext(AuthContext);
+  const { signIn, signUp, loadingAuth, signed } = useContext(AuthContext);
 
   const [login, setLogin] = useState(true);
   const [name, setName] = useState('');
@@ -17,26 +20,31 @@ export default function Login() {
   const [religiao, setReligiao] = useState('');
   const [documentoRecomendacaoPastoral, setDocumentoRecomendacaoPastoral] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);
+  
+  const navigation = useNavigation();
 
   function toggleLogin(){
     setLogin(!login);
     setName('');
-    setEmail('');
     setPassword('');
   }
 
   function handleLogin(){
     if(email === '' || password === ''){
-      console.log('Preencha todos os campos!');
+      Alert.alert('Aviso', 'Preencha todos os campos!');
       return;
     }signIn(email, password);
+    if(signed){
+      navigation.navigate('AppRoutes')
+    }
   }
 
   function handleSignUp(){
     if(name === '' || email === '' || password === ''){
-      console.log('Preencha todos os campos!');
+      Alert.alert('Aviso', 'Preencha todos os campos!');
       return;}
     signUp(email, password, name, estado, igreja, religiao, documentoRecomendacaoPastoral);
+    toggleLogin();
   }
 
   const pickDocument = async () => {
@@ -59,6 +67,11 @@ export default function Login() {
         <View style={styles.imageContainer}>
           <Image source={require('../../assets/img/login_background.jpg')} style={styles.topImage} />
           <LinearGradient style={styles.gradient} colors={['transparent', 'rgba(0,0,0,0.70)', 'rgba(0,0,0,0.95)']}/>
+          <TouchableOpacity style={styles.backButton} 
+          onPress={() => navigation.goBack()}
+          >
+            <Feather name='arrow-left-circle' color={'white'} size={40} />
+          </TouchableOpacity>
           <Text style={styles.titulo}>
             Bem vindo!
           </Text>
@@ -100,6 +113,11 @@ export default function Login() {
     <View style={styles.imageContainer}>
       <Image source={require('../../assets/img/login_background.jpg')} style={styles.topImage} />
       <LinearGradient style={styles.gradient} colors={['transparent', 'rgba(0,0,0,0.70)', 'rgba(0,0,0,0.95)']} />
+      <TouchableOpacity style={styles.backButton} 
+      onPress={() => navigation.goBack()}
+      >
+            <Feather name='arrow-left-circle' color={'white'} size={40} />
+      </TouchableOpacity>
       <Text style={styles.titulo}>
         Página de cadastro
       </Text>
@@ -196,6 +214,13 @@ export default function Login() {
     borderRadius: 10,
     marginTop: 20,
   },
+  backButton: {
+    position: 'absolute',
+    top: 20,
+    left: 20,
+    paddingTop: 25,
+    zIndex: 1
+  },
   titulo: {
     color: '#fff',
     fontWeight: 'bold',
@@ -217,11 +242,6 @@ export default function Login() {
   topBar: {
     height: 60,
     width: '100%',
-  },
-  backButton: {
-    position: 'absolute',
-    left: 20,
-    top: 15,
   },
   title: {
     fontSize: 24,
